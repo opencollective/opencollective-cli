@@ -7,9 +7,6 @@
 
 // Native
 import { resolve } from 'path';
-import { getCollective } from '../lib/utils';
-
-const collective = getCollective();
 
 // This command will be run if no other sub command is specified
 const defaultCommand = 'collective';

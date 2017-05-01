@@ -30,8 +30,8 @@ const fetchLogo = fetchData.fetchLogo;
 const fetchBanner = fetchData.fetchBanner;
 const printLogo = print.printLogo;
 
-const projectPackageJSON = path.normalize("../../package.json");
-const projectREADME = path.normalize("../../README.md");
+const projectPackageJSON = path.normalize("./package.json");
+const projectREADME = path.normalize("./README.md");
 
 var pkg;
 try {
@@ -42,7 +42,7 @@ try {
 }
 if (!pkg) {
   console.log("Cannot load the `package.json` of your project");
-  console.log("Please make sure `opencollective-postinstall` is within the `node_modules` directory of your project.")
+  console.log("Please make sure you are running `opencollective postinstall` from the root directory of your project.")
   console.log("");
   process.exit(0);
 } else if(pkg.collective && pkg.collective.url) {
@@ -122,7 +122,7 @@ const ProcessAnswers = function(answers) {
   } else {
     delete pkg.collective.logo;
   }
-  var postinstall = "opencollective-postinstall || exit 0";
+  var postinstall = "opencollective postinstall";
   pkg.scripts = pkg.scripts || {};
   if (pkg.scripts.postinstall && pkg.scripts.postinstall.indexOf(postinstall) === -1) {
     pkg.scripts.postinstall = pkg.scripts.postinstall + " && " + postinstall;
@@ -180,7 +180,7 @@ fetchLogo("https://opencollective.com/opencollective/logo.txt")
     console.log("Please double check your new updated README.md to make sure everything looks 👌.");
     console.log("");
     console.log("Protip: You can also suggest a donation amount.");
-    console.log("See the docs for more options: https://github.com/opencollective/opencollective-postinstall");
+    console.log("See the docs for more options: https://github.com/opencollective/opencollective-cli");
     console.log("");
     console.log("Have a great day!");
     return process.exit(0);

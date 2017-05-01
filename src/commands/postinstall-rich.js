@@ -1,6 +1,6 @@
 import minimist from 'minimist';
 
-import { debug, getCollective, padding } from '../lib/utils';
+import { debug, getCollective, padding, getPackageJSON } from '../lib/utils';
 import { printLogo, printFooter, printStats} from '../lib/print';
 import { fetchStats, fetchLogo } from '../lib/fetchData';
 
@@ -14,6 +14,13 @@ const argv = minimist(process.argv.slice(2), {
 
 const collective = getCollective();
 collective.logo = argv.logo || process.env.npm_package_collective_logo;
+
+if (!collective.logo) {
+  const pkg = getPackageJSON();
+  if (pkg.collective) {
+    collective.logo = pkg.collective.logo;
+  }
+}
 
 function init() {
   const promises = [];
