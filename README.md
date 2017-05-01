@@ -1,22 +1,32 @@
 # Open Collective
 
-Official node module for Open Collective.
+Command Line Interface for Open Collective.
 
-    $ opencollective postinstall [--plain]
-    
-Reads the details of your collective in your `package.json` and invite the user to donate after installing your package.
+## Commands
 
-    $ opencollective setup
+    $ opencollective [collective] [info|stats]
     
-Interactive setup to add your collective info into your `package.json` and add the backers/sponsors badge and avatars in your `README.md`.
+Shows the latest stats of the collective (number of contributors, number of backers, annual budget and current balance).
+
+![](https://cl.ly/1n2u281p2o1k/Screen%20Shot%202017-05-01%20at%204.41.58%20PM.png)
 
     $ opencollective [collective] donate [amount] [frequency]
 
 Opens the donate page of your collective. E.g. $ opencollective webpack donate 5 monthly
 
-    $ open collective [collective] info|stats
+    $ opencollective postinstall [--plain]
     
-Shows the latest stats of the collective (number of contributors, number of backers, annual budget and current balance).
+Reads the details of your collective in the `package.json` of the current directory and invite the user to donate after installing your package.
+Add this command in the `postinstall` script of your `package.json`.
+
+![](https://cl.ly/0u2a0z0Y3X37/Screen%20Shot%202017-03-24%20at%202.37.46%20PM.png)
+
+If you add the `--plain` option, it won't show any emoji and ascii art (better for old terminals).
+
+    $ opencollective setup
+
+Interactive setup to add your collective info into your `package.json` and add the backers/sponsors badge and avatars in your `README.md`.
+
 
 ## Coming soon
 
