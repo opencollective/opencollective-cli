@@ -1,6 +1,6 @@
 {
   "name": "opencollective",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Official Command Line Interface for Open Collective",
   "main": "index.js",
   "repository": {
