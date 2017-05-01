@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 const collective = getCollective();
 
-const args = getArgs('collective', 'verb', 'amount', 'frequency');
+const args = getArgs('collective', 'amount', 'frequency');
 
 if (!collective) {
   const bin = resolve(__dirname, `./donate-help.js`);

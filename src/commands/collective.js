@@ -2,7 +2,7 @@ import minimist from 'minimist';
 import { resolve } from 'path';
 import { getCollective } from '../lib/utils';
 import { fetchLogo, fetchStats } from '../lib/fetchData';
-import { printStats } from '../lib/print';
+import { print, printStats, printLogo } from '../lib/print';
 
 const collective = getCollective();
 
@@ -20,7 +20,7 @@ if (argv.help || !collective) {
 
 const promises = [];
 promises.push(fetchStats(collective.url));
-if (collective.logo) {
+if (collective.logo && !argv.plain) {
   promises.push(fetchLogo(collective.logo));
 }
 
@@ -28,11 +28,16 @@ Promise.all(promises)
   .then(function(results) {
     collective.stats = results[0];
     const logotxt = results[1];
-
+    const opts = { plain: argv.plain, align: 'left' };
+    console.log("");
     if (logotxt) {
+      opts.align = 'center';
       printLogo(logotxt);
     }
-    printStats(collective.stats);
+    print(collective.url, Object.assign({}, opts, { color: 'bold' }));
+    console.log("");
+    printStats(collective.stats, opts);
+    console.log("");
     process.exit(0);     
   })
   .catch(function(e) {

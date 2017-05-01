@@ -25,6 +25,10 @@ function getDonateURL(collective) {
 
 const print = function(str, opts) {
   opts = opts || { color: null, align: 'center'};
+  if (opts.plain) {
+    opts.color = null;
+  }
+  str = str || '';
   opts.align = opts.align || 'center';
   const terminalCols = process.platform === 'win32' ? 80 : parseInt(execSync(`tput cols`).toString());
   const strLength = str.replace(/\u001b\[[0-9]{2}m/g,'').length;
@@ -37,12 +41,12 @@ const print = function(str, opts) {
   console.log(leftPadding, str);
 }
 
-const printStats = function(stats) {
+const printStats = function(stats, opts) {
   if (!stats) return;
-  print(`Number of contributors: ${stats.contributorsCount}`);
-  print(`Number of backers: ${stats.backersCount}`);
-  print(`Annual budget: ${formatCurrency(stats.yearlyIncome, stats.currency)}`);
-  print(`Current balance: ${formatCurrency(stats.balance, stats.currency)}`, { color: 'bold' });  
+  print(`Number of contributors: ${stats.contributorsCount}`, opts);
+  print(`Number of backers: ${stats.backersCount}`, opts);
+  print(`Annual budget: ${formatCurrency(stats.yearlyIncome, stats.currency)}`, opts);
+  print(`Current balance: ${formatCurrency(stats.balance, stats.currency)}`, Object.assign({}, { color: 'bold' }, opts));  
 }
 
 const printLogo = function(logotxt) {

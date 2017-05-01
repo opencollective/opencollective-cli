@@ -35,7 +35,9 @@ const commands = new Set([
 const aliases = new Map([
   ['ls', 'list'],
   ['rm', 'remove'],
-  ['cc', 'billing']
+  ['cc', 'billing'],
+  ['info', 'collective'],
+  ['stats', 'collective']
 ]);
 
 let cmd = defaultCommand;

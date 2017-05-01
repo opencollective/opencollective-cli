@@ -2,39 +2,44 @@
 
 Official node module for Open Collective.
 
-    $> opencollective postinstall
+    $ opencollective postinstall [--plain]
     
 Reads the details of your collective in your `package.json` and invite the user to donate after installing your package.
 
-    $> opencollective setup
+    $ opencollective setup
     
 Interactive setup to add your collective info into your `package.json` and add the backers/sponsors badge and avatars in your `README.md`.
 
-    $> opencollective donate [collective] [amount] [frequency]
-    
-    $> opencollective login
-    
-    $> opencollective logout
-    
-    $> opencollective cc | billing
-    
-    $> opencollective cc ls
-    $> opencollective cc add
-    $> opencollective cc rm
-    
-    $> opencollective apply [github_repo_url]
-    
-    $> opencollective show <collective>
-    $> opencollective open <collective>
-    
-    $> opencollective ls
+    $ opencollective [collective] donate [amount] [frequency]
 
-list the collectives you are contributing to.
+Opens the donate page of your collective. E.g. $ opencollective webpack donate 5 monthly
 
-    $> opencollective add <collective>
+    $ open collective [collective] info|stats
+    
+Shows the latest stats of the collective (number of contributors, number of backers, annual budget and current balance).
 
-Add a collective to your list of collectives you are contributing to.   
-   
-    $> opencollective rm <collective>
+## Coming soon
+
+    $ opencollective login
+    
+    $ opencollective logout
+    
+    $ opencollective cc | billing
+    
+    $ opencollective cc ls
+    $ opencollective cc add
+    $ opencollective cc rm
+    
+    $ opencollective apply [github_repo_url]
+    
+    $ opencollective show <collective>
+    $ opencollective open <collective>
+    
+    $ opencollective ls // list the collectives you are contributing to.
+
     
 Stop your contribution to <collective>. Warning: may make someone sad somewhere on this planet.
+
+## Credits
+
+Shamelessly inspired by the excellent [now-cli](https://github.com/zeit/now-cli)

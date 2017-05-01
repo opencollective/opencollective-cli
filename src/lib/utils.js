@@ -41,7 +41,9 @@ export function formatCurrency(amount, currency, precision) {
 
 const argv = minimist(process.argv.slice(2), {
   alias: {
-    collective: 'c'
+    collective: 'c',
+    logo: 'l',
+    help: 'h'
   }
 });
 
@@ -62,20 +64,28 @@ export function getCollectiveSlug() {
   if (argv.collective) return argv.collective;
   if (process.env.npm_package_name) return process.env.npm_package_name;
   if (argv._[0]) return argv._[0];
-
-  const pkg = getPackageJSON();
-  if (pkg && pkg.collective && pkg.collective.url) {
-    return pkg.collective.url.substr(pkg.collective.url.lastIndexOf('/')+1).toLowerCase();
-  }
 }
 
 export function getCollective() {
-  const collectiveSlug = getCollectiveSlug();
-  if (!collectiveSlug) return null;
-  const collective = {
-    slug: collectiveSlug,
-    url: process.env.npm_package_collective_url || `https://opencollective.com/${collectiveSlug}`
-  };
+  let pkg;
+  const collective = {};
+  collective.slug = getCollectiveSlug();
+  if (!collective.slug) {
+    pkg = getPackageJSON();
+    if (pkg && pkg.collective && pkg.collective.url) {
+      collective.slug = pkg.collective.url.substr(pkg.collective.url.lastIndexOf('/')+1).toLowerCase();
+    }
+  }
+  collective.url = process.env.npm_package_collective_url || `https://opencollective.com/${collective.slug}`;
+  collective.logo = argv.logo || process.env.npm_package_collective_logo;
+
+  if (!collective.logo) {
+    pkg = pkg || getPackageJSON();
+    if (pkg.collective) {
+      collective.logo = pkg.collective.logo;
+    }
+  }
+
   debug(">>> collective", collective);
   return collective;
 }
