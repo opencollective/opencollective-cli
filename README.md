@@ -2,6 +2,21 @@
 
 Command Line Interface for Open Collective.
 
+## Install
+
+    $ npm install -g opencollective
+    
+This will populate a `opencollective` (and its shortcut `oc`) as a command line.
+
+You can also add this as a dependency in your `package.json` to automatically show the `postinstall` donate message:
+
+    $ npm install --save opencollective
+    
+Then run
+
+    $ opencollective setup
+
+
 ## Commands
 
     $ opencollective [collective] [info|stats]
