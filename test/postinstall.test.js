@@ -19,7 +19,7 @@ describe("setup.test.js", function() {
   })
 
   it("runs the postinstall script after npm install", function(done) {
-    this.timeout(10000);
+    this.timeout(15000);
     var proc = exec("npm install", { cwd: paths.package }, function(err, stdout, stderr) {
       stdout = stdout.toString('utf8');
       expect(stdout).to.contain("*** Thank you for using testpackage! ***");
@@ -29,8 +29,8 @@ describe("setup.test.js", function() {
   });
 
   it("installs a package that has opencollective-postinstall", function(done) {
-    this.timeout(8000);
-    var proc = exec("cross-env DEBUG=postinstall npm install --save " + paths.package, { cwd: paths.parentpackage }, function(err, stdout, stderr) {
+    this.timeout(15000);
+    var proc = exec("npm install --save " + paths.package, { cwd: paths.parentpackage }, function(err, stdout, stderr) {
       stdout = stdout.toString('utf8');
       var pkg = JSON.parse(fs.readFileSync(paths.parentpackagejson, 'utf8'));
       expect(pkg.dependencies).to.have.property("testpackage");
