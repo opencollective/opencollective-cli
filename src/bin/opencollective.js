@@ -5,6 +5,8 @@
  * https://github.com/zeit/now-cli/blob/b1663954fe935beb0244002625e05402f59bd20e/bin/now.js
  */
 
+import 'babel-polyfill';
+
 // Native
 import { resolve } from 'path';
 
