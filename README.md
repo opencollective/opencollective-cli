@@ -1,4 +1,5 @@
-# Open Collective
+# opencollective-cli
+![](https://ci.appveyor.com/api/projects/status/5mf75q34cpr74s53?svg=true)
 
 Command Line Interface for Open Collective.
 
