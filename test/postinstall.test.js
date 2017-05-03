@@ -19,8 +19,10 @@ describe("setup.test.js", function() {
   })
 
   it("runs the postinstall script after npm install", function(done) {
-    this.timeout(15000);
+    this.timeout(20000);
     var proc = exec("npm install", { cwd: paths.package }, function(err, stdout, stderr) {
+      console.log(">>> stderr", stderr);
+      console.log(">>> stdout", stdout);
       stdout = stdout.toString('utf8');
       expect(stdout).to.contain("*** Thank you for using testpackage! ***");
       expect(stdout).to.contain("https://opencollective.com/testpackage/donate");
@@ -32,6 +34,8 @@ describe("setup.test.js", function() {
     this.timeout(15000);
     var proc = exec("npm install --save " + paths.package, { cwd: paths.parentpackage }, function(err, stdout, stderr) {
       stdout = stdout.toString('utf8');
+      console.log(">>> stderr", stderr);
+      console.log(">>> stdout", stdout);
       var pkg = JSON.parse(fs.readFileSync(paths.parentpackagejson, 'utf8'));
       expect(pkg.dependencies).to.have.property("testpackage");
       expect(stdout).to.contain("https://opencollective.com/testpackage/donate");
