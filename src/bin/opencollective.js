@@ -5,6 +5,7 @@
  * https://github.com/zeit/now-cli/blob/b1663954fe935beb0244002625e05402f59bd20e/bin/now.js
  */
 
+// Make sure we have new Set() and new Map() for Node 0.10.x
 import 'babel-polyfill';
 
 // Native
