@@ -16,7 +16,8 @@ export function isDevEnvironment() {
 }
 
 export function isFancyEnvironment() {
-  return (isDevEnvironment() && process.stdout.isTTY && process.platform !== 'win32');
+  const npm_config_node_version = process.env.npm_config_node_version;
+  return (isDevEnvironment() && process.stdout.isTTY && process.platform !== 'win32' && (!npm_config_node_version || parseInt(npm_config_node_version.substr(0,npm_config_node_version.indexOf('.')))) >= 5);
 }
 
 export function padding(length) {
