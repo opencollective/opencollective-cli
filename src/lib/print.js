@@ -1,15 +1,12 @@
-const execSync = require('child_process').execSync;
-const chalk = require('chalk');
-const utils = require('../lib/utils');
-
-const padding = utils.padding;
-const formatCurrency = utils.formatCurrency;
+import { execSync } from 'child_process';
+import chalk from 'chalk';
+import { padding, formatCurrency } from '../lib/utils';
 
 const collective_suggested_donation_amount = process.env.npm_package_collective_suggested_donation_amount;
 const collective_suggested_donation_interval = process.env.npm_package_collective_suggested_donation_interval;
 const user_agent = process.env.npm_config_user_agent;
 
-function getDonateURL(collective) {
+export function getDonateURL(collective) {
   var donate_url = collective.url;
   if (collective_suggested_donation_amount) {
     donate_url += `/donate/${collective_suggested_donation_amount}`;
@@ -23,7 +20,7 @@ function getDonateURL(collective) {
   return donate_url;
 }
 
-const print = function(str, opts) {
+export function print(str, opts) {
   opts = opts || { color: null, align: 'center'};
   if (opts.plain) {
     opts.color = null;
@@ -41,7 +38,7 @@ const print = function(str, opts) {
   console.log(leftPadding, str);
 }
 
-const printStats = function(stats, opts) {
+export function printStats(stats, opts) {
   if (!stats) return;
   print(`Number of contributors: ${stats.contributorsCount}`, opts);
   print(`Number of backers: ${stats.backersCount}`, opts);
@@ -49,7 +46,7 @@ const printStats = function(stats, opts) {
   print(`Current balance: ${formatCurrency(stats.balance, stats.currency)}`, Object.assign({}, { color: 'bold' }, opts));  
 }
 
-const printLogo = function(logotxt) {
+export function printLogo(logotxt) {
   if (!logotxt) return;
   logotxt.split('\n').forEach(function(line) {
     return print(line, { color: 'blue' });
@@ -60,7 +57,7 @@ const printLogo = function(logotxt) {
  * Only show emoji on OSx (Windows shell doesn't like them that much ¯\_(ツ)_/¯ )
  * @param {*} emoji 
  */
-const emoji = function(emoji) {
+export function emoji(emoji) {
   if (process.stdout.isTTY && process.platform === 'darwin') {
     return emoji;
   } else {
@@ -68,7 +65,7 @@ const emoji = function(emoji) {
   }
 }
 
-const printFooter = function(collective) {
+export function printFooter(collective) {
   console.log("");
   print(`Thanks for installing ${collective.slug} ${emoji('🙏')}`, { color: 'yellow' });
   print(`Please consider donating to our open collective`, { color: 'dim' });
@@ -79,10 +76,3 @@ const printFooter = function(collective) {
   print(`${chalk.bold(`${emoji('👉 ')} Donate:`)} ${chalk.underline(getDonateURL(collective))}`);
   console.log("");
 }
-
-module.exports = {
-  print,
-  printLogo,
-  printStats,
-  printFooter
-};

@@ -25,8 +25,8 @@ function init() {
       process.exit(0);     
     })
     .catch(function(e) {
-      console.error("Error caught: ", e);
-      printFooter();
+      debug("Error caught: ", e);
+      printFooter(collective);
       process.exit(0);
     })
 }
