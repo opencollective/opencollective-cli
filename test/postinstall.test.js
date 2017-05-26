@@ -11,7 +11,7 @@ var paths = {
 
 var originalParentPackageJSON = fs.readFileSync(paths.parentpackagejson, 'utf8');
 
-describe("setup.test.js", function() {
+describe("postinstall.test.js", function() {
 
   // restore the originals package.json
   after(function() {
@@ -28,7 +28,7 @@ describe("setup.test.js", function() {
     });
   });
 
-  it("installs a package that has opencollective-postinstall", function(done) {
+  it("installs a package that runs `opencollective postinstall`", function(done) {
     this.timeout(15000);
     var proc = exec("npm install --save " + paths.package, { cwd: paths.parentpackage }, function(err, stdout, stderr) {
       stdout = stdout.toString('utf8');

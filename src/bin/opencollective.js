@@ -45,12 +45,11 @@ const aliases = new Map([
 
 let cmd = defaultCommand;
 const args = process.argv.slice(2);
-const index = args.findIndex(a => commands.has(a));
+const index = args.findIndex(a => commands.has(a.replace(/:.+/,'')));
 
 if (index > -1) {
-  cmd = args[index];
+  cmd = args[index].replace(/:/,'-');
   args.splice(index, 1);
-
   if (cmd === 'help') {
     if (index < args.length && commands.has(args[index])) {
       cmd = args[index];

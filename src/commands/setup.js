@@ -1,61 +1,139 @@
-const utils = require("../lib/utils");
-const debug = utils.debug;
+import fs from 'fs';
+import path from 'path';
+import { spawn, execSync, existsSync } from 'child_process';
+import minimist from 'minimist';
+import opn from 'opn';
+import inquirer from 'inquirer';
+import fetch from 'node-fetch';
 
-if (!utils.isDevEnvironment()) {
-  debug("Not in dev environment");
+import { debug, error, getPackageJSON, getCollective } from '../lib/utils';
+import { fetchLogo } from "../lib/fetchData";
+import { printLogo } from "../lib/print";
+import { updateReadme } from '../lib/updateReadme'; 
+import { updateTemplate } from '../lib/updateTemplate'; 
+import { addPostInstall } from '../lib/addPostInstall';
+
+let projectPath = '.';
+let org, repo;
+let pkg;
+
+const argv = minimist(process.argv.slice(2), {
+  alias: {
+    help: 'h',
+    interactive: 'i',
+    repo: 'r',
+    github_token: 'gt'
+  }
+});
+
+let github_token = argv.github_token;
+
+if (argv.help) {
+  const bin = path.resolve(__dirname, `./setup-help.js`);
+  require(bin, 'may-exclude');
   process.exit(0);
 }
 
-// In some CI environment, NODE_ENV might not be defined.
-// We exit if `inquirer` module is not installed
-try {
-  require.resolve("inquirer");
-} catch(e) {
-  debug("Can't find inquirer module, exiting");
-  process.exit(0);
+console.log("")
+
+const fork = (org, repo, github_token) => {
+  return fetch(`https://api.github.com/repos/${org}/${repo}/forks?org=opencollective`, { method: 'POST', headers: { "Authorization": `token ${github_token}` }})
 }
 
-const inquirer = require("inquirer");
-if (typeof inquirer.prompt([]).then !== "function") {
-  debug("Wrong version of inquirer, exiting");
-  process.exit(0);
+const submitPullRequest = (org, repo, projectPath, github_token) => {
+  
+  let body = `This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️\n\nIt adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]\n\nSee how it looks on [this repo](https://github.com/apex/apex#backers).\n`;
+
+  execSync(`git add README.md && git commit -m "Added backers and sponsors on the README" || exit 0`, { cwd: projectPath });
+  if (pkg) {
+    execSync(`git add package.json && git commit -m "Added call to donate after npm install" || exit 0`, { cwd: projectPath });
+    body += `\nWe have also added a \`postinstall\` script to let people know after \`npm|yarn install\` that you are welcoming donations. [[More info](https://github.com/OpenCollective/opencollective-cli)]`;
+  }
+  execSync(`git add .github/* && git commit -m "Added template for new issue" || exit 0`, { cwd: projectPath });
+
+  execSync("git push origin opencollective", { cwd: projectPath });
+  const data = {
+    title: "Activating Open Collective",
+    body,
+    head: "opencollective:opencollective",
+    base: "master"
+  }
+
+  return fetch(`https://api.github.com/repos/${org}/${repo}/pulls`, { method: 'POST', headers: {'Authorization': `token ${github_token}`}, body: JSON.stringify(data) })
+    .then(res => res.json())
+    .then(json => json.html_url);
 }
 
-const fs = require("fs");
-const path = require("path");
-const fetchData = require("../lib/fetchData");
-const print = require("../lib/print");
-
-const fetchLogo = fetchData.fetchLogo;
-const fetchBanner = fetchData.fetchBanner;
-const printLogo = print.printLogo;
-
-const projectPackageJSON = path.normalize("./package.json");
-const projectREADME = path.normalize("./README.md");
-
-var pkg;
-try {
-  pkg = JSON.parse(fs.readFileSync(projectPackageJSON, "utf8"));
-  debug("package.json successfully loaded for " + pkg.name);
-} catch(e) {
-  debug("Unable to load " + process.cwd() + "/" + projectPackageJSON, e);
-}
-if (!pkg) {
-  console.log("Cannot load the `package.json` of your project");
-  console.log("Please make sure you are running `opencollective postinstall` from the root directory of your project.")
-  console.log("");
-  process.exit(0);
-} else if(pkg.collective && pkg.collective.url) {
-  debug("Open Collective already configured 👌");
-  process.exit(0);
+const clean = (repo) => {
+  if (!repo) return;
+  execSync(`rm -rf ${repo}`, { cwd: path.resolve('/tmp') })
 }
 
-const askQuestions = function() {
+const loadProject = () => {
 
-  if (process.env.OC_POSTINSTALL_TEST) {
+  if (!argv.repo) return Promise.resolve();
+
+  const parts = argv.repo.split('/');
+  org = parts[0];
+  repo = parts[1];
+
+  if (!github_token) {
+    let configFile;
+    try {
+      configFile = fs.readFileSync(path.join(process.env.HOME, ".opencollective.json"));
+      const config = JSON.parse(configFile);
+      github_token = config.github_token;
+    } catch (e) {
+      debug("Cannot read ~/.opencollective.json", e);
+    }
+
+    if (!github_token) {
+      error("Github token missing. Get one one https://github.com/settings/tokens and pass it using the --github_token argument.");
+      process.exit(0);
+    }
+  }
+
+  projectPath = path.join('/tmp', repo);
+  const logsFile = path.join('/tmp', `${repo}.log`);
+
+  return fork(org, repo, github_token)
+    .then(() => {
+      try {
+        execSync(`git clone --depth 1 git@github.com:opencollective/${repo}.git >> ${logsFile} 2>&1 && cd ${repo} && git checkout -b opencollective`, { cwd: path.resolve('/tmp') });
+      } catch (e) {
+        debug("error in git clone", e);
+      }
+
+      if (fs.existsSync(path.join(projectPath, "package.json"))) {
+        pkg = getPackageJSON(projectPath);
+        console.log("Running npm install --save opencollective");
+        return execSync(`npm install --save opencollective >> ${logsFile} 2>&1`, { cwd: projectPath });
+      }
+    });
+}
+
+const loadPackageJSON = () => {
+
+  pkg = getPackageJSON(projectPath);
+
+  if (!pkg) {
+    debug("Cannot load the `package.json` of your project");
+    return null;
+  } else if(pkg.collective && pkg.collective.url) {
+    debug("Open Collective already configured 👌");
+    process.exit(0);
+  }
+  
+}
+
+const askQuestions = function(interactive) {
+
+  if (!interactive || process.env.OC_POSTINSTALL_TEST) {
     return {
-      collectiveSlug: pkg.name,
-      logo: "https://opencollective.com/opencollective/logo.txt"
+      collectiveSlug: repo || pkg.name,
+      logo: "https://opencollective.com/opencollective/logo.txt",
+      updateIssueTemplate: true,
+      updatePullRequestTemplate: false
     };
   }
 
@@ -64,7 +142,7 @@ const askQuestions = function() {
       type: "input",
       name: "collectiveSlug",
       message: "Enter the slug of your collective (https://opencollective.com/:slug)",
-      default: pkg.name,
+      default: repo || pkg.name,
       validate: function(str) {
         if(str.match(/^[a-zA-Z\-0-9]+$/)) return true;
         else return "Please enter a valid slug (e.g. https://opencollective.com/webpack)";
@@ -76,12 +154,13 @@ const askQuestions = function() {
       message: "What logo should we use?",
       choices: function(answers) {
         return [
-          { name: "Open Collective logo (see above)", value: "https://opencollective.com/opencollective/logo.txt" },
+          { name: "Open Collective logo", value: "https://opencollective.com/opencollective/logo.txt" },
           { name: "The logo of your Collective (https://opencollective.com/" + answers.collectiveSlug + "/logo.txt)", value: "https://opencollective.com/" + answers.collectiveSlug + "/logo.txt" },
           { name: "Custom URL", value: "custom"},
           { name: "No logo", value: null }
         ];
-      }
+      },
+      when: () => (pkg)
     },
     {
       type: "input",
@@ -95,14 +174,23 @@ const askQuestions = function() {
         else return "Please enter a valid url (e.g. https://opencollective.com/webpack/logo.txt)";
       },
       when: function(answers) {
-        return (answers.showLogo === "custom");
+        return (pkg && answers.showLogo === "custom");
       }
+    },
+    {
+      type: "confirm",
+      name: "updateIssueTemplate",
+      default: true,
+      message: "Update .github/ISSUE_TEMPLATE.md?"
+    },
+    {
+      type: "confirm",
+      name: "updatePullRequestTemplate",
+      default: false,
+      message: "Update .github/PULL_REQUEST_TEMPLATE.md?"
     }
   ];
 
-  console.log("");
-  console.log("You don't have any collective set in your package.json");
-  console.log("Let's fix this, shall we?");
   console.log("");
   return inquirer.prompt(questions).catch(function(e) {
     debug("Error while running the prompt", e);
@@ -111,76 +199,60 @@ const askQuestions = function() {
 }
 
 const ProcessAnswers = function(answers) {
-  console.log("> Updating your package.json");
-  pkg.collective = {
-    type: "opencollective",
-    url: "https://opencollective.com/" + answers.collectiveSlug
+  const collective = { slug: answers.collectiveSlug }; // defaults to `repo`
+
+  updateReadme(path.join(projectPath, "README.md"), collective);
+  if (pkg) {
+    addPostInstall(path.join(projectPath, "package.json"), collective, answers);
   }
-  const logo = answers.logo || answers.showLogo;
-  if (logo) {
-    pkg.collective.logo = logo;
-  } else {
-    delete pkg.collective.logo;
+  if (answers.updateIssueTemplate) {
+    updateTemplate(path.join(projectPath, ".github", "ISSUE_TEMPLATE.md"), collective);
   }
-  var postinstall = "opencollective postinstall";
-  pkg.scripts = pkg.scripts || {};
-  if (pkg.scripts.postinstall && pkg.scripts.postinstall.indexOf(postinstall) === -1) {
-    pkg.scripts.postinstall = pkg.scripts.postinstall + " && " + postinstall;
-  } else {
-    pkg.scripts.postinstall = postinstall;
+  if (answers.updatePullRequestTemplate) {
+    updateTemplate(path.join(projectPath, ".github", "PULL_REQUEST_TEMPLATE.md"), collective);
   }
-  fs.writeFileSync(projectPackageJSON, JSON.stringify(pkg, null, 2), "utf8");
-  return updateREADME(answers.collectiveSlug);
-}
-
-const updateREADME = function(collectiveSlug) {
-  const badgesmd = "[![Backers on Open Collective](https://opencollective.com/" + collectiveSlug + "/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/" + collectiveSlug + "/sponsors/badge.svg)](#sponsors)";
-  const badgeshtml = "<a href=\"#backers\" alt=\"sponsors on Open Collective\"><img src=\"https://opencollective.com/" + collectiveSlug + "/backers/badge.svg\" /></a> <a href=\"#sponsors\" alt=\"Sponsors on Open Collective\"><img src=\"https://opencollective.com/" + collectiveSlug + "/sponsors/badge.svg\" /></a>";
-
-  var readme;
-  try {
-    readme = fs.readFileSync(projectREADME, "utf8");
-
-    if (readme.indexOf("https://opencollective.com/" + collectiveSlug + "/backers/badge.svg") !== -1) {
-      console.log("Looks like you already have Open Collective added to your README.md, skipping this step.")
-      return;
-    }
-
-    const lines = readme.split("\n");
-    const newLines = [];
-
-    var firstBadgeDetected = false;
-    lines.forEach(function(line) {
-      if (!firstBadgeDetected && (line.match(/badge.svg/) || line.match(/img.shields.io/))) {
-        firstBadgeDetected = true;
-        newLines.push(line.match(/<img src/) ? badgeshtml : badgesmd);
-      }
-      newLines.push(line);
-    })
-
-    return fetchBanner(collectiveSlug).then(function(banner) {
-      newLines.push(banner);
-      console.log("> Adding badges and placeholders for backers and sponsors on your README.md");
-      return fs.writeFileSync(projectREADME, newLines.join("\n"), "utf8");
-    });
-  } catch(e) {
-    console.log("> Unable to open your README.md file");
-    return;
-  }
+  return;
 }
 
 console.log("");
-fetchLogo("https://opencollective.com/opencollective/logo.txt")
-  .then(printLogo)
-  .then(askQuestions)
-  .then(ProcessAnswers)
-  .then(function() {
-    console.log("Done.");
+
+loadProject()
+  .then(loadPackageJSON)
+  .then(() => askQuestions(argv.interactive))
+  .then(ProcessAnswers).catch(console.error)
+  .then(() => {
+    if (!argv.repo) return;
+    if (!process.env.DEBUG) {
+      // Make sure it had the time to write the files to disk
+      // TODO: Turn the updateTemplate, updateReadme into promises to avoid this hack
+      return new Promise((resolve, reject) => {
+        setTimeout(resolve, 1000);
+      });
+    }
+    // if DEBUG, we ask for confirmation
+    execSync(`open README.md`, { cwd: projectPath });
+    return inquirer.prompt([{
+      type: "confirm",
+      name: "confirm",
+      message: "Please double check the pull request",
+      default: true
+    }]).catch(console.error)
+  })
+  .then(answers => {
+      if (argv.repo && (!answers || answers.confirm)) {
+        return submitPullRequest(org, repo, projectPath, github_token);
+      }
+  })
+  .then(pullRequestUrl => {
+    if (pullRequestUrl) {
+      console.log("");
+      console.log("Pull request created: ", pullRequestUrl);
+      clean(repo);
+    } else {
+      console.log("Done.");
+    }
     console.log("");
     console.log("Please double check your new updated README.md to make sure everything looks 👌.");
-    console.log("");
-    console.log("Protip: You can also suggest a donation amount.");
-    console.log("See the docs for more options: https://github.com/opencollective/opencollective-cli");
     console.log("");
     console.log("Have a great day!");
     return process.exit(0);

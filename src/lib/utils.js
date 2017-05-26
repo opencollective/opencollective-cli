@@ -2,11 +2,20 @@ import fs from 'fs';
 import chalk from 'chalk';
 import minimist from 'minimist';
 import path from 'path';
+import { print } from './print';
 
 export function debug() {
   if (process.env.DEBUG) {
     console.log.apply(this, arguments);
   }
+}
+
+export function error(msg) {
+  console.log("");
+  print(msg, { cols: msg.length });
+  console.log("");
+  print("¯\\_(ツ)_/¯", { cols: msg.length });
+  console.log("");  
 }
 
 export function isDevEnvironment() {
@@ -40,16 +49,23 @@ export function formatCurrency(amount, currency, precision) {
   });
 }
 
-const argv = minimist(process.argv.slice(2), {
+export const argv = minimist(process.argv.slice(2), {
   alias: {
     collective: 'c',
-    logo: 'l',
-    help: 'h'
+    slug: 's',
+    file: 'f',
+    help: 'h',
+    logo: 'l'
   }
 });
 
-export function getPackageJSON() {
-  const packageJSONPath = path.resolve('./package.json');
+export function detectBadge(line) {
+  if (!line) return false;
+  return (line.match(/badge.svg/) || line.match(/img.shields.io/) || line.match(/https?:\/\/badges?\./) || line.match(/https?:\/\/ci.appveyor/));
+}
+
+export function getPackageJSON(repoPath = '.') {
+  const packageJSONPath = path.join(repoPath, './package.json');
   debug("Loading ", packageJSONPath);
   let pkg;
   try {
@@ -57,12 +73,14 @@ export function getPackageJSON() {
     return pkg;
   } catch(e) {
     debug("error while trying to load ./package.json", "cwd:", process.cwd(), e);
+    return null;
   }
 }
 
 export function getCollectiveSlug() {
   debug(">>> argv", argv);
   if (argv.collective) return argv.collective;
+  if (argv.slug) return argv.slug;
   if (process.env.npm_package_name) return process.env.npm_package_name;
   if (argv._[0]) return argv._[0];
 }
@@ -75,6 +93,8 @@ export function getCollective() {
     pkg = getPackageJSON();
     if (pkg && pkg.collective && pkg.collective.url) {
       collective.slug = pkg.collective.url.substr(pkg.collective.url.lastIndexOf('/')+1).toLowerCase();
+    } else {
+      collective.slug = pkg.name;
     }
   }
   collective.url = process.env.npm_package_collective_url || `https://opencollective.com/${collective.slug}`;
@@ -92,6 +112,7 @@ export function getCollective() {
 }
 
 export function getArgs() {
+  if (Object.keys(arguments).length === 0) return argv;
   const args = {};
   for (const i in arguments) {
     args[arguments[i]] = argv._[i];
