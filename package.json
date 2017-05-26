@@ -12,7 +12,8 @@
     "clean": "rm -rf dist && rm -rf test/*package*/node_modules && git checkout test/*package*/* || exit 0",
     "build": "babel --copy-files -d dist/ src/",
     "watch": "babel -w --copy-files -d dist/ src/",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "postinstall": "opencollective postinstall"
   },
   "bin": {
     "opencollective": "./dist/bin/opencollective.js",
@@ -38,7 +39,8 @@
     "inquirer": "3.0.6",
     "minimist": "1.2.0",
     "node-fetch": "1.6.3",
-    "opn": "4.0.2"
+    "opn": "4.0.2",
+    "opencollective": "^1.0.3"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",
@@ -49,5 +51,10 @@
     "chai": "3.5.0",
     "cross-env": "4.0.0",
     "mocha": "3.2.0"
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/tipboxk",
+    "logo": "https://opencollective.com/opencollective/logo.txt"
   }
 }
