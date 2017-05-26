@@ -40,7 +40,6 @@ export function updateReadme(filepath, collective) {
   lines.forEach(function(line) {
     if (!firstBadgeDetected && detectBadge(line)) {
       firstBadgeDetected = true;
-      console.log("Badge detected!", line);
       if (line.match(/<img src/i)) {
         line = line.replace(/<img src/i, `${badgeshtml} <img src`);
       } else {
