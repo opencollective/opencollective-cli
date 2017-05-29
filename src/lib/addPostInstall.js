@@ -1,13 +1,10 @@
 import path from 'path';
 import fs from 'fs';
-import { debug, error } from '../lib/utils';
-import detectIndent from 'detect-indent';
+import { debug, error, readJSONFile, writeJSONFile } from '../lib/utils';
 
 export function addPostInstall(projectPackageJSON, collective, options) {
 
-  const file = fs.readFileSync(projectPackageJSON, "utf8");
-  const indent = detectIndent(file).indent || '  ';
-  const pkg = JSON.parse(file);
+  const pkg = readJSONFile(projectPackageJSON);
   if (!pkg) {
     console.log("Cannot load the `package.json` of your project");
     console.log("Please make sure you are running `opencollective postinstall` from the root directory of your project.")
@@ -42,5 +39,5 @@ export function addPostInstall(projectPackageJSON, collective, options) {
     pkg.dependencies.opencollective = "^1.0.3";
   }
   debug("Writing to package.json", { collective: pkg.collective, scripts: pkg.scripts });
-  return fs.writeFileSync(projectPackageJSON, JSON.stringify(pkg, null, indent), "utf8");
+  return writeJSONFile(projectPackageJSON, pkg);
 }

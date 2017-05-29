@@ -6,7 +6,7 @@ import opn from 'opn';
 import inquirer from 'inquirer';
 import fetch from 'node-fetch';
 
-import { debug, error, getPackageJSON, getCollective } from '../lib/utils';
+import { debug, error, getPackageJSON, readJSONFile, writeJSONFile, getCollective } from '../lib/utils';
 import { fetchLogo } from "../lib/fetchData";
 import { printLogo } from "../lib/print";
 import { updateReadme } from '../lib/updateReadme'; 
@@ -16,6 +16,7 @@ import { addPostInstall } from '../lib/addPostInstall';
 let projectPath = '.';
 let org, repo;
 let pkg;
+let github_token;
 
 const argv = minimist(process.argv.slice(2), {
   alias: {
@@ -26,15 +27,11 @@ const argv = minimist(process.argv.slice(2), {
   }
 });
 
-let github_token = argv.github_token;
-
 if (argv.help) {
   const bin = path.resolve(__dirname, `./setup-help.js`);
   require(bin, 'may-exclude');
   process.exit(0);
 }
-
-console.log("")
 
 const fork = (org, repo, github_token) => {
   return fetch(`https://api.github.com/repos/${org}/${repo}/forks?org=opencollective`, { method: 'POST', headers: { "Authorization": `token ${github_token}` }})
@@ -42,7 +39,12 @@ const fork = (org, repo, github_token) => {
 
 const submitPullRequest = (org, repo, projectPath, github_token) => {
   
-  let body = `This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️\n\nIt adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]\n\nSee how it looks on [this repo](https://github.com/apex/apex#backers).\n`;
+  let body = `This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️
+  
+  It adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]. See how it looks on [this repo](https://github.com/apex/apex#backers).
+  
+  You can also add a "Donate" button to your website and automatically show your backers and sponsors there with our widgets. Have a look here: https://opencollective.com/widgets
+  `;
 
   execSync(`git add README.md && git commit -m "Added backers and sponsors on the README" || exit 0`, { cwd: projectPath });
   if (pkg) {
@@ -69,27 +71,42 @@ const clean = (repo) => {
   execSync(`rm -rf ${repo}`, { cwd: path.resolve('/tmp') })
 }
 
-const loadProject = () => {
+const loadProject = (argv) => {
 
   if (!argv.repo) return Promise.resolve();
+
+  github_token = argv.github_token;
 
   const parts = argv.repo.split('/');
   org = parts[0];
   repo = parts[1];
 
   if (!github_token) {
-    let configFile;
-    try {
-      configFile = fs.readFileSync(path.join(process.env.HOME, ".opencollective.json"));
-      const config = JSON.parse(configFile);
-      github_token = config.github_token;
-    } catch (e) {
-      debug("Cannot read ~/.opencollective.json", e);
-    }
+    const configFile = readJSONFile(path.join(process.env.HOME, ".opencollective.json")) || {};
+    github_token = configFile.github_token;
 
     if (!github_token) {
-      error("Github token missing. Get one one https://github.com/settings/tokens and pass it using the --github_token argument.");
-      process.exit(0);
+      console.log("You need a Github Token to do this.");
+      console.log("Grab one on https://github.com/settings/tokens");
+      console.log("");
+      return inquirer.prompt([{
+        type: "input",
+        name: "github_token",
+        message: "Github Token"
+        }]).then(answers => {
+          console.log("");
+          github_token = answers.github_token;
+          if (!github_token) {
+            error("Github token missing. Get one on https://github.com/settings/tokens and pass it using the --github_token argument.");
+            process.exit(0);          
+          }
+          if (github_token.length != 40) {
+            error("Invalid Github Token (should be 40 chars long)");
+            process.exit(0);
+          }
+          configFile.github_token = github_token;
+          return writeJSONFile("~/.opencollective.json", configFile);
+      })
     }
   }
 
@@ -106,8 +123,10 @@ const loadProject = () => {
 
       if (fs.existsSync(path.join(projectPath, "package.json"))) {
         pkg = getPackageJSON(projectPath);
-        console.log("Running npm install --save opencollective");
-        return execSync(`npm install --save opencollective >> ${logsFile} 2>&1`, { cwd: projectPath });
+        if (!pkg.dependencies || !pkg.dependencies.opencollective) {
+          console.log("Running npm install --save opencollective");
+          return execSync(`npm install --save opencollective >> ${logsFile} 2>&1`, { cwd: projectPath });
+        }
       }
     });
 }
@@ -216,7 +235,7 @@ const ProcessAnswers = function(answers) {
 
 console.log("");
 
-loadProject()
+loadProject(argv)
   .then(loadPackageJSON)
   .then(() => askQuestions(argv.interactive))
   .then(ProcessAnswers).catch(console.error)

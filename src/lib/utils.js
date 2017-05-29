@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import minimist from 'minimist';
 import path from 'path';
 import { print } from './print';
+import detectIndent from 'detect-indent';
 
 export function debug() {
   if (process.env.DEBUG) {
@@ -64,13 +65,37 @@ export function detectBadge(line) {
   return (line.match(/badge.svg/) || line.match(/img.shields.io/) || line.match(/https?:\/\/badges?\./) || line.match(/https?:\/\/ci.appveyor/));
 }
 
+export function readJSONFile(file) {
+  file = path.resolve(file.replace(/^~/, process.env.HOME));
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (e) {
+    debug("Unable to read JSON file ", file);
+    debug(e);
+  }
+}
+
+export function writeJSONFile(file, json) {
+  file = path.resolve(file.replace(/^~/, process.env.HOME));
+  let fileContent = '';
+  try {
+    fileContent = fs.readFileSync(file, 'utf8');
+  } catch (e) {}
+  try {
+    const indent = detectIndent(fileContent).indent || '  ';
+    fs.writeFileSync(file, JSON.stringify(json, null, indent));
+  } catch(e) {
+    debug("Unable to write JSON file", file);
+    debug(e);
+  }
+}
+
 export function getPackageJSON(repoPath = '.') {
   const packageJSONPath = path.join(repoPath, './package.json');
   debug("Loading ", packageJSONPath);
   let pkg;
   try {
-    pkg = JSON.parse(fs.readFileSync(packageJSONPath, "utf8"));
-    return pkg;
+    return readJSONFile(packageJSONPath);
   } catch(e) {
     debug("error while trying to load ./package.json", "cwd:", process.cwd(), e);
     return null;
