@@ -9,14 +9,10 @@ var paths = {
   'parentpackagejson': path.resolve('test/parentpackage/package.json'),
 };
 
-var originalParentPackageJSON = fs.readFileSync(paths.parentpackagejson, 'utf8');
-
 describe("postinstall.test.js", function() {
 
   // restore the originals package.json
-  after(function() {
-    fs.writeFileSync(paths.parentpackagejson, originalParentPackageJSON, "utf8");
-  })
+  after('clean', (done) => exec("npm run clean", done));
 
   it("runs the postinstall script after npm install", function(done) {
     this.timeout(15000);

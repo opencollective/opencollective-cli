@@ -19,7 +19,8 @@ export function updateReadme(filepath, collective) {
   }
 
   if (readme.indexOf("https://opencollective.com/" + collective.slug + "/backers/badge.svg") !== -1) {
-    return error("Looks like you already have Open Collective added to your README.md");
+    error("Looks like you already have Open Collective added to your README.md");
+    return Promise.reject(new Error("Open Collective already added in README.md"));
   }
 
 

@@ -1,13 +1,15 @@
 import path from 'path';
 import { expect } from 'chai';
-
+import { exec } from 'child_process';
 import { updateReadme } from '../src/lib/updateReadme';
 
-var paths = {
+const paths = {
   'readme': path.resolve('test/package/README.md'),
 };
 
 describe("updateReadme.test.js", () => {
+
+  after('clean', (done) => exec("npm run clean", done));
 
   it('updates the readme', (done) => {
     updateReadme(paths.readme, { slug: 'testcollective' }).then((readme) => {
