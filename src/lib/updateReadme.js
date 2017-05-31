@@ -50,7 +50,7 @@ export function updateReadme(filepath, collective) {
 
     // We place the placeholders just above the license section if any
     if (!placeholdersPlaced) {
-      if (line.match(/^#+ ?License/i)) {
+      if (line.match(/^#+.*License.*/i)) {
         newLines.push(placeholders);
         placeholdersPlaced = true;
       }
