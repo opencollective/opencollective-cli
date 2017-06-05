@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import { debug, error, readJSONFile, writeJSONFile } from '../lib/utils';
+import { debug, error, readJSONFile } from '../lib/utils';
+import { writeJSONFile } from '../lib/write';
 
 export function addPostInstall(projectPackageJSON, collective, options) {
 

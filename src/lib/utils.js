@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import minimist from 'minimist';
 import path from 'path';
 import { print } from './print';
-import detectIndent from 'detect-indent';
 
 export function debug() {
   if (process.env.DEBUG) {
@@ -71,21 +70,6 @@ export function readJSONFile(file) {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch (e) {
     debug("Unable to read JSON file ", file);
-    debug(e);
-  }
-}
-
-export function writeJSONFile(file, json) {
-  file = path.resolve(file.replace(/^~/, process.env.HOME));
-  let fileContent = '';
-  try {
-    fileContent = fs.readFileSync(file, 'utf8');
-  } catch (e) {}
-  try {
-    const indent = detectIndent(fileContent).indent || '  ';
-    fs.writeFileSync(file, JSON.stringify(json, null, indent));
-  } catch(e) {
-    debug("Unable to write JSON file", file);
     debug(e);
   }
 }
