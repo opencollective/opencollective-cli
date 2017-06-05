@@ -8,8 +8,8 @@
     "url": "git+https://github.com/opencollective/opencollective-cli.git"
   },
   "scripts": {
-    "test": "npm run clean && npm run build && mocha test --require babel-core/register",
-    "clean": "rm -rf dist && rm -rf test/*package*/node_modules && git checkout test/*package*/* || exit 0",
+    "test": "npm run clean && npm run build && test/run_tests.sh",
+    "clean": "rm -rf dist && rm -rf test/*package*/node_modules && git checkout test/*package*/ || exit 0",
     "build": "babel --copy-files -d dist/ src/",
     "watch": "babel -w --copy-files -d dist/ src/",
     "prepare": "npm run build",

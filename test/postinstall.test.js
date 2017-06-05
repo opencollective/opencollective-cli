@@ -18,6 +18,7 @@ describe("postinstall.test.js", function() {
     this.timeout(15000);
     var proc = exec("npm install", { cwd: paths.package }, function(err, stdout, stderr) {
       stdout = stdout.toString('utf8');
+      stderr = stderr.toString('utf8');
       expect(stdout).to.contain("*** Thank you for using testpackage! ***");
       expect(stdout).to.contain("https://opencollective.com/testpackage/donate");
       done();
