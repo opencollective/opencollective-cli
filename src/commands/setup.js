@@ -50,14 +50,6 @@ const submitPullRequest = (org, repo, projectPath, github_token) => {
     body += `\nWe have also added a \`postinstall\` script to let people know after \`npm|yarn install\` that you are welcoming donations (optional). [[More info](https://github.com/OpenCollective/opencollective-cli)]`;
   }
 
-  execSync("git push origin opencollective", { cwd: projectPath });
-  const data = {
-    title: "Activating Open Collective",
-    body,
-    head: "opencollective:opencollective",
-    base: "master"
-  }
-
   body += `\nYou can also add a "Donate" button to your website and automatically show your backers and sponsors there with our widgets. Have a look here: https://opencollective.com/widgets
 
   P.S: As with any pull request, feel free to comment or suggest changes. The only thing "required" are the placeholders on the README because we believe it's important to acknowledge the people in your community that are contributing (financially or with code!).
@@ -67,6 +59,14 @@ const submitPullRequest = (org, repo, projectPath, github_token) => {
 
   Come chat with us in the #opensource channel on https://slack.opencollective.com - great place to ask questions and share best practices with other open source sustainers!
   `;
+
+  execSync("git push origin opencollective", { cwd: projectPath });
+  const data = {
+    title: "Activating Open Collective",
+    body,
+    head: "opencollective:opencollective",
+    base: "master"
+  }
 
   return fetch(`https://api.github.com/repos/${org}/${repo}/pulls`, { method: 'POST', headers: {'Authorization': `token ${github_token}`}, body: JSON.stringify(data) })
     .then(res => res.json())
@@ -123,6 +123,7 @@ const loadProject = (argv) => {
   return fork(org, repo, github_token)
     .then(() => {
       try {
+        console.log(`Forking ${org}/${repo}`);
         execSync(`git clone --depth 1 git@github.com:opencollective/${repo}.git >> ${logsFile} 2>&1 && cd ${repo} && git checkout -b opencollective`, { cwd: path.resolve('/tmp') });
       } catch (e) {
         debug("error in git clone", e);
@@ -159,6 +160,7 @@ const askQuestions = function(interactive) {
       collectiveSlug: repo || pkg.name,
       logo: "https://opencollective.com/opencollective/logo.txt",
       updateIssueTemplate: true,
+      updateContributing: true,
       updatePullRequestTemplate: false
     };
   }
@@ -267,7 +269,7 @@ loadProject(argv)
   .then(ProcessAnswers).catch(console.error)
   .then(() => {
     if (!argv.repo) return;
-    if (!process.env.DEBUG || !argv.interactive) {
+    if (!process.env.DEBUG && !argv.interactive) {
       // Make sure it had the time to write the files to disk
       // TODO: Turn the updateTemplate, updateReadme into promises to avoid this hack
       return new Promise((resolve, reject) => {

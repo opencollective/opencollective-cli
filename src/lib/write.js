@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import detectIndent from 'detect-indent';
 
 export function writeJSONFile(file, json) {

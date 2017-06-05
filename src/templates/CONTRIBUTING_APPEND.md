@@ -22,7 +22,7 @@ Thank you to all our backers! [[Become a backer](https://opencollective.com/{{sl
 
 ### Sponsors
 
-Thank you to all our sponsors! (please ask your company to also support this open source project by [[becoming a sponsor](https://opencollective.com/{{slug}}#sponsor))
+Thank you to all our sponsors! (please ask your company to also support this open source project by [becoming a sponsor](https://opencollective.com/{{slug}}#sponsor))
 
 <a href="https://opencollective.com/{{slug}}/sponsor/0/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/{{slug}}/sponsor/1/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/1/avatar.svg"></a>
