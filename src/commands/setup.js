@@ -6,7 +6,8 @@ import opn from 'opn';
 import inquirer from 'inquirer';
 import fetch from 'node-fetch';
 
-import { debug, error, getPackageJSON, readJSONFile, writeJSONFile, getCollective } from '../lib/utils';
+import { debug, error, getPackageJSON, readJSONFile, getCollective } from '../lib/utils';
+import { writeJSONFile } from '../lib/write';
 import { fetchLogo } from "../lib/fetchData";
 import { printLogo } from "../lib/print";
 import { updateReadme } from '../lib/updateReadme'; 
@@ -41,17 +42,13 @@ const submitPullRequest = (org, repo, projectPath, github_token) => {
   
   let body = `This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️
   
-  It adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]. See how it looks on [this repo](https://github.com/apex/apex#backers).
+  It adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]. See how it looks on [this repo](https://github.com/apex/apex#backers).`;
   
-  You can also add a "Donate" button to your website and automatically show your backers and sponsors there with our widgets. Have a look here: https://opencollective.com/widgets
-  `;
-
   execSync(`git add README.md && git commit -m "Added backers and sponsors on the README" || exit 0`, { cwd: projectPath });
   if (pkg) {
-    execSync(`git add package.json && git commit -m "Added call to donate after npm install" || exit 0`, { cwd: projectPath });
-    body += `\nWe have also added a \`postinstall\` script to let people know after \`npm|yarn install\` that you are welcoming donations. [[More info](https://github.com/OpenCollective/opencollective-cli)]`;
+    execSync(`git add package.json && git commit -m "Added call to donate after npm install (optional)" || exit 0`, { cwd: projectPath });
+    body += `\nWe have also added a \`postinstall\` script to let people know after \`npm|yarn install\` that you are welcoming donations (optional). [[More info](https://github.com/OpenCollective/opencollective-cli)]`;
   }
-  execSync(`git add .github/* && git commit -m "Added template for new issue" || exit 0`, { cwd: projectPath });
 
   execSync("git push origin opencollective", { cwd: projectPath });
   const data = {
@@ -60,6 +57,16 @@ const submitPullRequest = (org, repo, projectPath, github_token) => {
     head: "opencollective:opencollective",
     base: "master"
   }
+
+  body += `\nYou can also add a "Donate" button to your website and automatically show your backers and sponsors there with our widgets. Have a look here: https://opencollective.com/widgets
+
+  P.S: As with any pull request, feel free to comment or suggest changes. The only thing "required" are the placeholders on the README because we believe it's important to acknowledge the people in your community that are contributing (financially or with code!).
+
+  Thank you for your great contribution to the open source community. You are awesome! 🙌
+  And welcome to the open collective community! 😊
+
+  Come chat with us in the #opensource channel on https://slack.opencollective.com - great place to ask questions and share best practices with other open source sustainers!
+  `;
 
   return fetch(`https://api.github.com/repos/${org}/${repo}/pulls`, { method: 'POST', headers: {'Authorization': `token ${github_token}`}, body: JSON.stringify(data) })
     .then(res => res.json())
@@ -198,6 +205,12 @@ const askQuestions = function(interactive) {
     },
     {
       type: "confirm",
+      name: "updateContributing",
+      default: true,
+      message: "Update CONTRIBUTING.md?"
+    },
+    {
+      type: "confirm",
       name: "updateIssueTemplate",
       default: true,
       message: "Update .github/ISSUE_TEMPLATE.md?"
@@ -218,7 +231,7 @@ const askQuestions = function(interactive) {
 }
 
 const ProcessAnswers = function(answers) {
-  const collective = { slug: answers.collectiveSlug }; // defaults to `repo`
+  const collective = { slug: answers.collectiveSlug.replace('.','') }; // defaults to `repo`
 
   updateReadme(path.join(projectPath, "README.md"), collective);
   if (pkg) {
@@ -228,7 +241,20 @@ const ProcessAnswers = function(answers) {
     updateTemplate(path.join(projectPath, ".github", "ISSUE_TEMPLATE.md"), collective);
   }
   if (answers.updatePullRequestTemplate) {
-    updateTemplate(path.join(projectPath, ".github", "PULL_REQUEST_TEMPLATE.md"), collective);
+    updateTemplate(path.join(projectPath, ".github", "PULL_REQUEST_TEMPLATE.md"), collective)
+      .then(({newFile, filename}) => {
+        const verb = newFile ? 'Added' : 'Updated';
+        const msg = `${verb} .github/${filename} (optional)`;
+        execSync(`git add .github/${filename} && git commit -m "${msg}" || exit 0`, { cwd: projectPath });
+      });
+  }
+  if (answers.updateContributing) {
+    updateTemplate(path.join(projectPath, "CONTRIBUTING.md"), collective)
+      .then(({newFile, filename}) => {
+        const verb = newFile ? 'Added' : 'Updated';
+        const msg = `${verb} ${filename} (optional)`;
+        execSync(`git add ${filename} && git commit -m "${msg}" || exit 0`, { cwd: projectPath });
+      });
   }
   return;
 }
@@ -241,19 +267,19 @@ loadProject(argv)
   .then(ProcessAnswers).catch(console.error)
   .then(() => {
     if (!argv.repo) return;
-    if (!process.env.DEBUG) {
+    if (!process.env.DEBUG || !argv.interactive) {
       // Make sure it had the time to write the files to disk
       // TODO: Turn the updateTemplate, updateReadme into promises to avoid this hack
       return new Promise((resolve, reject) => {
         setTimeout(resolve, 1000);
       });
     }
-    // if DEBUG, we ask for confirmation
+    // if DEBUG or interactive mode, we ask for confirmation
     execSync(`open README.md`, { cwd: projectPath });
     return inquirer.prompt([{
       type: "confirm",
       name: "confirm",
-      message: "Please double check the pull request",
+      message: `Please double check the pull request (cd /tmp/${repo} && git status;)`,
       default: true
     }]).catch(console.error)
   })
