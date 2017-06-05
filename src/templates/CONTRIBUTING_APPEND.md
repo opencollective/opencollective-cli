@@ -15,14 +15,14 @@ Thank you to all the people who have already contributed to {{slug}}!
 
 ### Backers
 
-Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/{{slug}}#backer)]
+Thank you to all our backers! [[Become a backer](https://opencollective.com/{{slug}}#backer)]
 
 <a href="https://opencollective.com/{{slug}}#backers" target="_blank"><img src="https://opencollective.com/{{slug}}/backers.svg?width=890"></a>
 
 
 ### Sponsors
 
-Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/{{slug}}#sponsor)]
+Thank you to all our sponsors! (please ask your company to also support this open source project by [[becoming a sponsor](https://opencollective.com/{{slug}}#sponsor))
 
 <a href="https://opencollective.com/{{slug}}/sponsor/0/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/{{slug}}/sponsor/1/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/1/avatar.svg"></a>
