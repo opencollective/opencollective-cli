@@ -240,7 +240,12 @@ const ProcessAnswers = function(answers) {
     addPostInstall(path.join(projectPath, "package.json"), collective, answers);
   }
   if (answers.updateIssueTemplate) {
-    updateTemplate(path.join(projectPath, ".github", "ISSUE_TEMPLATE.md"), collective);
+    updateTemplate(path.join(projectPath, ".github", "ISSUE_TEMPLATE.md"), collective)
+      .then(({newFile, filename}) => {
+        const verb = newFile ? 'Added' : 'Updated';
+        const msg = `${verb} .github/${filename} (optional)`;
+        execSync(`git add .github/${filename} && git commit -m "${msg}" || exit 0`, { cwd: projectPath });
+      });
   }
   if (answers.updatePullRequestTemplate) {
     updateTemplate(path.join(projectPath, ".github", "PULL_REQUEST_TEMPLATE.md"), collective)

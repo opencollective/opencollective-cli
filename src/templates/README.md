@@ -1,19 +1,19 @@
 ## Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute]](blob/master/CONTRIBUTING.md).
+This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
 <a href="graphs/contributors"><img src="https://opencollective.com/{{slug}}/contributors.svg?width=890" /></a>
 
 
 ## Backers
 
-Thank you to all our backers! [[Become a backer](https://opencollective.com/{{slug}}#backer)]
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/{{slug}}#backer)]
 
 <a href="https://opencollective.com/{{slug}}#backers" target="_blank"><img src="https://opencollective.com/{{slug}}/backers.svg?width=890"></a>
 
 
 ## Sponsors
 
-Thank you to all our sponsors! (please ask your company to also support this open source project by [becoming a sponsor](https://opencollective.com/{{slug}}#sponsor))
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/{{slug}}#sponsor)]
 
 <a href="https://opencollective.com/{{slug}}/sponsor/0/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/{{slug}}/sponsor/1/website" target="_blank"><img src="https://opencollective.com/{{slug}}/sponsor/1/avatar.svg"></a>
