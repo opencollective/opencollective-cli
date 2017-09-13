@@ -172,7 +172,7 @@ const askQuestions = function(interactive) {
       message: "Enter the slug of your collective (https://opencollective.com/:slug)",
       default: repo || pkg.name,
       validate: function(str) {
-        if(str.match(/^[a-zA-Z\-0-9]+$/)) return true;
+        if(str.match(/^[a-zA-Z\-0-9_]+$/)) return true;
         else return "Please enter a valid slug (e.g. https://opencollective.com/webpack)";
       }
     },
