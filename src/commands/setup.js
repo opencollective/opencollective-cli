@@ -40,7 +40,7 @@ const fork = (org, repo, github_token) => {
 
 const submitPullRequest = (org, repo, projectPath, github_token) => {
   
-  let body = `Hi, I'm making updates for Open Collective. Either you or a supporter signed this repo up for open-collective. This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️
+  let body = `Hi, I'm making updates for Open Collective. Either you or a supporter signed this repo up for Open Collective. This pull request adds backers and sponsors from your Open Collective https://opencollective.com/${repo} ❤️
   
   It adds two badges at the top to show the latest number of backers and sponsors. It also adds placeholders so that the avatar/logo of new backers/sponsors can automatically be shown without having to update your README.md. [[more info](https://github.com/opencollective/opencollective/wiki/Github-banner)]. See how it looks on [this repo](https://github.com/apex/apex#backers).`;
   
