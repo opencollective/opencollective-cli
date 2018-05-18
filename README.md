@@ -1,4 +1,6 @@
 # opencollective-cli
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/opencollective/opencollective-cli.svg)](https://greenkeeper.io/)
 ![](https://ci.appveyor.com/api/projects/status/5mf75q34cpr74s53?svg=true)
 
 Command Line Interface for Open Collective.
