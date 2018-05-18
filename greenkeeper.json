@@ -1,0 +1,12 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "test/package/package.json",
+        "test/package_with_postinstall/package.json",
+        "test/parentpackage/package.json"
+      ]
+    }
+  }
+}
