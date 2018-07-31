@@ -1,7 +1,7 @@
 ## Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="graphs/contributors"><img src="https://opencollective.com/{{slug}}/contributors.svg?width=890" /></a>
+<a href="graphs/contributors"><img src="https://opencollective.com/{{slug}}/contributors.svg?width=890&button=false" /></a>
 
 
 ## Backers
