@@ -8,8 +8,6 @@ import fetch from 'node-fetch';
 
 import { debug, error, getPackageJSON, readJSONFile, getCollective } from '../lib/utils';
 import { writeJSONFile } from '../lib/write';
-import { fetchLogo } from "../lib/fetchData";
-import { printLogo } from "../lib/print";
 import { updateReadme } from '../lib/updateReadme'; 
 import { updateTemplate } from '../lib/updateTemplate'; 
 import { addPostInstall } from '../lib/addPostInstall';
@@ -158,7 +156,6 @@ const askQuestions = function(interactive) {
   if (!interactive || process.env.OC_POSTINSTALL_TEST) {
     return {
       collectiveSlug: repo || pkg.name,
-      logo: "https://opencollective.com/opencollective/logo.txt",
       updateIssueTemplate: true,
       updateContributing: true,
       updatePullRequestTemplate: false
@@ -174,35 +171,6 @@ const askQuestions = function(interactive) {
       validate: function(str) {
         if(str.match(/^[a-zA-Z\-0-9_]+$/)) return true;
         else return "Please enter a valid slug (e.g. https://opencollective.com/webpack)";
-      }
-    },
-    {
-      type: "list",
-      name: "showLogo",
-      message: "What logo should we use?",
-      choices: function(answers) {
-        return [
-          { name: "Open Collective logo", value: "https://opencollective.com/opencollective/logo.txt" },
-          { name: "The logo of your Collective (https://opencollective.com/" + answers.collectiveSlug + "/logo.txt)", value: "https://opencollective.com/" + answers.collectiveSlug + "/logo.txt" },
-          { name: "Custom URL", value: "custom"},
-          { name: "No logo", value: null }
-        ];
-      },
-      when: () => (pkg)
-    },
-    {
-      type: "input",
-      name: "logo",
-      message: "URL of your logo in ASCII art",
-      default: function(answers) {
-        "https://opencollective.com/" + answers.collectiveSlug + "/logo.txt"
-      },
-      validate: function(str) {
-        if(str.match(/^https?:\/\/[^\/]+\/.+$/)) return true;
-        else return "Please enter a valid url (e.g. https://opencollective.com/webpack/logo.txt)";
-      },
-      when: function(answers) {
-        return (pkg && answers.showLogo === "custom");
       }
     },
     {
@@ -237,7 +205,7 @@ const ProcessAnswers = function(answers) {
 
   updateReadme(path.join(projectPath, "README.md"), collective);
   if (pkg) {
-    addPostInstall(path.join(projectPath, "package.json"), collective, answers);
+    addPostInstall(path.join(projectPath, "package.json"), collective);
   }
   if (answers.updateIssueTemplate) {
     updateTemplate(path.join(projectPath, ".github", "ISSUE_TEMPLATE.md"), collective)
