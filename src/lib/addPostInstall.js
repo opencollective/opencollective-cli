@@ -3,7 +3,7 @@ import fs from 'fs';
 import { debug, error, readJSONFile } from '../lib/utils';
 import { writeJSONFile } from '../lib/write';
 
-export function addPostInstall(projectPackageJSON, collective, options) {
+export function addPostInstall(projectPackageJSON, collective) {
 
   const pkg = readJSONFile(projectPackageJSON);
   if (!pkg) {
@@ -21,13 +21,7 @@ export function addPostInstall(projectPackageJSON, collective, options) {
     type: "opencollective",
     url: "https://opencollective.com/" + collective.slug
   }
-  const logo = collective.logo || options.logo || options.showLogo;
-
-  if (logo) {
-    pkg.collective.logo = logo;
-  } else {
-    delete pkg.collective.logo;
-  }
+  
   var postinstall = "opencollective-postinstall";
   pkg.scripts = pkg.scripts || {};
   if (pkg.scripts.postinstall && pkg.scripts.postinstall.indexOf(postinstall) === -1) {
