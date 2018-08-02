@@ -4,6 +4,4 @@ import path from 'path';
 
 const collective = getCollective();
 
-addPostInstall(path.join(process.cwd(), "package.json"), collective, {
-  logo: 'https://opencollective.com/opencollective/logo.txt'
-})
+addPostInstall(path.join(process.cwd(), "package.json"), collective)
