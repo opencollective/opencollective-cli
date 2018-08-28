@@ -130,8 +130,8 @@ const loadProject = (argv) => {
       if (fs.existsSync(path.join(projectPath, "package.json"))) {
         pkg = getPackageJSON(projectPath);
         if (!pkg.dependencies || !pkg.dependencies.opencollective) {
-          console.log("Running npm install --save opencollective");
-          return execSync(`npm install --save opencollective >> ${logsFile} 2>&1`, { cwd: projectPath });
+          console.log("Running npm install --save opencollective-postinstall");
+          return execSync(`npm install --save opencollective-postinstall >> ${logsFile} 2>&1`, { cwd: projectPath });
         }
       }
     });
