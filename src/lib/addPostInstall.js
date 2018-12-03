@@ -29,9 +29,9 @@ export function addPostInstall(projectPackageJSON, collective) {
   } else {
     pkg.scripts.postinstall = postinstall;
   }
-  if (!pkg.dependencies || !pkg.dependencies.opencollective) {
+  if (!pkg.dependencies || !pkg.dependencies.opencollective-postinstall) {
     pkg.dependencies = pkg.dependencies || {};
-    pkg.dependencies.opencollective = "^1.0.3";
+    pkg.dependencies.opencollective-postinstall = "^2.0.0";
   }
   debug("Writing to package.json", { collective: pkg.collective, scripts: pkg.scripts });
   return writeJSONFile(projectPackageJSON, pkg);
