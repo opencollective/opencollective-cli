@@ -111,7 +111,7 @@ export function getCollective() {
 
   if (!collective.logo) {
     pkg = pkg || getPackageJSON();
-    if (pkg.collective) {
+    if (pkg && pkg.collective) {
       collective.logo = pkg.collective.logo;
     }
   }
