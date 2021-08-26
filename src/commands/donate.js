@@ -1,4 +1,4 @@
-import opn from 'opn';
+import open from 'open';
 import { getCollective, getArgs } from '../lib/utils';
 import { resolve } from 'path';
 
@@ -20,6 +20,6 @@ if (args.amount) {
   }
 }
 console.log("Opening", url);
-opn(url);
+open(url);
 
 process.exit(0);

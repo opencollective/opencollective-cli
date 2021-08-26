@@ -1,4 +1,4 @@
-import opn from 'opn';
+import open from 'open';
 import { getCollective } from '../lib/utils';
 
 const collective = getCollective();
@@ -10,6 +10,6 @@ if (!collective) {
 }
 
 console.log("Opening", collective.url);
-opn(collective.url);
+open(collective.url);
 
 process.exit(0);

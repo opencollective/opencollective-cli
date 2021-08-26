@@ -1,7 +1,7 @@
-import opn from 'opn';
+import open from 'open';
 
 const url = 'https://slack.opencollective.org';
 console.log("Opening", url);
-opn(url);
+open(url);
 
 process.exit(0);
