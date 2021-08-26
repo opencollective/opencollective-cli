@@ -1,3 +1,5 @@
+# ⚠️ This package will not receive further update, we suggest to switch to it's replacement, [opencollective-postinstall](https://github.com/opencollective/opencollective-postinstall)  instead, or removing the `postinstall` altogether, see: https://blog.opencollective.com/beyond-post-install/
+
 # opencollective-cli
 ![](https://ci.appveyor.com/api/projects/status/5mf75q34cpr74s53?svg=true)
 
