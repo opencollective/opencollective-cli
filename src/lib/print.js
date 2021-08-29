@@ -28,7 +28,7 @@ export function print(str, opts) {
   str = str || '';
   opts.align = opts.align || 'center';
   const terminalCols = process.platform === 'win32' ? 80 : parseInt(execSync(`tput cols`).toString());
-  const strLength = str.replace(/\u001b\[[0-9]{2}m/g,'').length;
+  const strLength = str.replace(/\u001b\[[0-9]{1,2}m/g,'').length;
   const leftPaddingLength = (opts.align === 'center') ? Math.floor((terminalCols - strLength) / 2) : 2; 
   const leftPadding = padding(leftPaddingLength);
   if (opts.color) {
